@@ -1,5 +1,5 @@
 # "org" ensures this Service is used with the correct Serverless Framework Access Key.
-org: pobear09
+org: ${SERVERLESS_ORG}
 # "app" enables Serverless Framework Dashboard features and sharing them with other Services.
 app: imageanalyser
 # "service" is the name of this project. This will also be added to your AWS resource names.
@@ -8,7 +8,7 @@ service: backend
 provider:
   name: aws
   runtime: nodejs20.x
-  BUCKET_NAME: mrducbucket
+  BUCKET_NAME: ${AWS_BUCKET_NAME}
 
 functions:
   uploadPhoto:
@@ -25,7 +25,7 @@ iam:
       - Effect: Allow
         Action:
           - "s3:*"
-        Resource: arn:aws:s3:::mrducbucket
+        Resource: arn:aws:s3:::${AWS_BUCKET_NAME}
       - Effect: Allow
         Action: 
           - "rekognition:detectLabels"
@@ -36,7 +36,7 @@ resources:
     PhotoBucket:
       type: AWS::S3::Bucket
       Properties:
-        BucketName: mrducbucket
+        BucketName: ${AWS_BUCKET_NAME}
     PhotoBucketAllowPublicReadPolicy:
       type: AWS::S3::BucketPolicy
       Properties:
