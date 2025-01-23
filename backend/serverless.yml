@@ -1,0 +1,56 @@
+# "org" ensures this Service is used with the correct Serverless Framework Access Key.
+org: ${SERVERLESS_ORG}
+# "app" enables Serverless Framework Dashboard features and sharing them with other Services.
+app: imageanalyser
+# "service" is the name of this project. This will also be added to your AWS resource names.
+service: backend
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  BUCKET_NAME: ${AWS_BUCKET_NAME}
+
+functions:
+  uploadPhoto:
+    handler: handler.savePhoto
+    events:
+      - httpApi:
+          path: /api/upload
+          method: post
+          cors: true
+
+iam:
+  role:
+    statements:
+      - Effect: Allow
+        Action:
+          - "s3:*"
+        Resource: arn:aws:s3:::${AWS_BUCKET_NAME}
+      - Effect: Allow
+        Action: 
+          - "rekognition:detectLabels"
+        Resource: "*"
+
+resources:
+  Resources:
+    PhotoBucket:
+      type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${AWS_BUCKET_NAME}
+    PhotoBucketAllowPublicReadPolicy:
+      type: AWS::S3::BucketPolicy
+      Properties:
+        Bucket: !Ref PhotoBucket
+        PolicyDocument:
+        Version: "2012-10-17"
+Statement:
+  - Effect: Allow
+    Action:
+      - "s3:GetObject"
+    Resource:
+      - !Join
+        - "/"
+        - [!GetAtt PhotoBucket.Arn, "*"]
+    Principal: "*"
+plugins:
+  - Serverless-offline
